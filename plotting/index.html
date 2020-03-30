@@ -1,0 +1,78 @@
+<html>
+    <head>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script
+              src="https://code.jquery.com/jquery-3.4.1.min.js"
+              integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+              crossorigin="anonymous"></script>
+        <script>
+            $(document).ready(()=>{
+                $.get( "parameters.json", (data) => {
+                    const traces = [
+                        {
+                            type: 'scatter',
+                            mode: 'markers',
+                            x: data.xs_range,
+                            y: data.ys,
+                            name: 'real data'
+                        },
+                        {
+                            type: 'scatter',
+                            y: data.logistic_ys,
+                            x: data.xs_range.slice(1),
+                            name: `logistic fit r=${data.logistic_r}`
+                        },
+                        {
+                            type: 'scatter',
+                            y: data.exponential_ys,
+                            x: data.xs_range.slice(1),
+                            name: `exponential fit r=${data.exponential_r}`
+                        },
+                        {
+                            type: 'scatter',
+                            y: data.logistic_first_derivative_ys,
+                            x: data.xs_range.slice(1),
+                            name: 'new cases'
+                        }
+                    ]
+                    const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+                    const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+                    const layout = {
+                        height: vh,
+                        width: vw,
+                        yaxis: {range:[0, data.logistic_parameters.c + 1000]},
+                        annotations: [{
+                            x: data.inflection_point[0] + 1,
+                            y: data.inflection_point[1],
+                            text: "Inflection Point",
+                            font: {
+                              color: "black",
+                              size: 12
+                            },
+                            showarrow: true,
+                            arrowhead: 2,
+                            ax: -50,
+                            ay: -50
+                        },{
+                            x: data.zero_cases.x,
+                            y: data.logistic_parameters.c / 2,
+                            text: "cases / day < 1",
+                            font: {
+                                color: "black",
+                                size: 12
+                            },
+                            showarrow: true,
+                            arrowhead: 2,
+                            ax: -100,
+                            ay: 0
+                        }]
+                    }
+                    Plotly.newPlot('plot', traces, layout)
+                });
+            })
+        </script>
+    </head>
+    <body>
+        <div class='result' id='plot' style="height:100vh; width:100vw"></div>
+    </body>
+</html>
